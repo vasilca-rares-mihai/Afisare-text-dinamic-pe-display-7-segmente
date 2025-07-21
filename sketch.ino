@@ -12,25 +12,27 @@ const int dig2 = 11;
 const int dig3 = 12;
 const int dig4 = 13;
 
-byte charH[] = {1, 0, 0, 1, 0, 0, 0}; //H
-byte charE[] = {0, 1, 1, 0, 0, 0, 0}; //E
-byte charL[] = {1, 1, 1, 0, 0, 0, 1}; //L
-byte charO[] = {0, 0, 0, 0, 0, 0, 1}; //O
+byte charH[] = {1, 0, 0, 1, 0, 0, 0}; 
+byte charE[] = {0, 1, 1, 0, 0, 0, 0}; 
+byte charL[] = {1, 1, 1, 0, 0, 0, 1}; 
+byte charO[] = {0, 0, 0, 0, 0, 0, 1}; 
+
+
 
 void setup() {
-  pinMode(segA, OUTPUT);
-  pinMode(segB, OUTPUT);
-  pinMode(segC, OUTPUT);
-  pinMode(segD, OUTPUT);
-  pinMode(segE, OUTPUT);
-  pinMode(segF, OUTPUT);
-  pinMode(segG, OUTPUT);
-  pinMode(segDP, OUTPUT);
-
-  pinMode(dig1, OUTPUT);
-  pinMode(dig2, OUTPUT);
-  pinMode(dig3, OUTPUT);
-  pinMode(dig4, OUTPUT);
+  //am setat pinii 2-7 de pe D si pinii de la 0 la 5 de pe B  pe output 
+  DDRD |= (1<<2);
+  DDRD |= (1<<3);
+  DDRD |= (1<<4);
+  DDRD |= (1<<5);
+  DDRD |= (1<<6);
+  DDRD |= (1<<7);
+  DDRB |= (1<<0);
+  DDRB |= (1<<1);
+  DDRB |= (1<<2);
+  DDRB |= (1<<3);
+  DDRB |= (1<<4);
+  DDRB |= (1<<5);
 
   allSegmentsOff();
   allDigitsOff();
@@ -47,7 +49,10 @@ void loop() {
     displayDigit(charO, dig4);
     delay(5);
   }
+
+  schimbpozitie(charH, charE, charL, charO);
 }
+
 
 void allSegmentsOff() {
   digitalWrite(segA, HIGH);
@@ -81,3 +86,33 @@ void displayDigit(byte characterPattern[], int digitPin) {
 
   digitalWrite(digitPin, HIGH);
 }
+
+void schimbpozitie(byte ch1[], byte ch2[], byte ch3[], byte ch4[]) {
+  byte temp[7];
+  
+  // copiez ch1 in temp
+  for (int i = 0; i < 7; i++) {
+    temp[i] = ch1[i];
+  }
+
+  // ch2 in ch1
+  for (int i = 0; i < 7; i++) {
+    ch1[i] = ch2[i];
+  }
+
+  // ch3 in ch2
+  for (int i = 0; i < 7; i++) {
+    ch2[i] = ch3[i];
+  }
+
+  // ch4 in ch3
+  for (int i = 0; i < 7; i++) {
+    ch3[i] = ch4[i];
+  }
+
+  // temp in ch4
+  for (int i = 0; i < 7; i++) {
+    ch4[i] = temp[i];
+  }
+}
+
