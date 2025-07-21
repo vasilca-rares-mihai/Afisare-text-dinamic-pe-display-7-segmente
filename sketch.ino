@@ -12,14 +12,25 @@ const int dig2 = 11;
 const int dig3 = 12;
 const int dig4 = 13;
 
-byte charH[] = {1, 0, 0, 1, 0, 0, 0}; 
-byte charE[] = {0, 1, 1, 0, 0, 0, 0}; 
-byte charL[] = {1, 1, 1, 0, 0, 0, 1}; 
-byte charO[] = {0, 0, 0, 0, 0, 0, 1}; 
+byte text[][7] = {
+  {1, 1, 1, 1, 1, 1, 1}, 
+  {1, 1, 1, 1, 1, 1, 1}, 
+  {1, 1, 1, 1, 1, 1, 1}, 
+  {1, 1, 1, 1, 1, 1, 1}, 
+  {1, 0, 0, 1, 0, 0, 0},  // H
+  {0, 1, 1, 0, 0, 0, 0},  // E
+  {1, 1, 1, 0, 0, 0, 1},  // L
+  {0, 0, 0, 0, 0, 0, 1}   // O
+};
 
+int lungime = sizeof(text) / sizeof(text[0]);
+bool start = false;
+bool scrollLR = false;
 
 
 void setup() {
+  
+  Serial.begin(9600);
   //am setat pinii 2-7 de pe D si pinii de la 0 la 5 de pe B  pe output 
   DDRD |= (1<<2);
   DDRD |= (1<<3);
@@ -36,22 +47,48 @@ void setup() {
 
   allSegmentsOff();
   allDigitsOff();
+
+  //buton
+  DDRC &= ~(1 << 0);   
+  PORTC |= (1 << 0);   
+
+
 }
 
 void loop() {
   for (int i = 0; i < 100; i++) {
-    displayDigit(charH, dig1);
+    displayDigit(text[0], dig1);
     delay(5);
-    displayDigit(charE, dig2);
+    displayDigit(text[1], dig2);
     delay(5);
-    displayDigit(charL, dig3);
+    displayDigit(text[2], dig3);
     delay(5);
-    displayDigit(charO, dig4);
+    displayDigit(text[3], dig4);
     delay(5);
   }
 
-  schimbpozitie(charH, charE, charL, charO);
+  if ((PINC & (1 << 0)) == 0) {  
+    Serial.println("Buton APASAT");
+    start = true;
+    if(scrollLR == false) {
+      scrollLR = true;
+    } else {
+      scrollLR = false;
+    }
+  } else {
+    Serial.println("Buton NEAPASAT");
+  }
+
+  if(start == true) {
+    if(scrollLR == false) {
+      schimbpozitieRtoL(text, lungime);
+    } else {
+      schimbpozitieLtoR(text, lungime);
+    }
+  }
+
 }
+
 
 
 void allSegmentsOff() {
@@ -87,32 +124,39 @@ void displayDigit(byte characterPattern[], int digitPin) {
   digitalWrite(digitPin, HIGH);
 }
 
-void schimbpozitie(byte ch1[], byte ch2[], byte ch3[], byte ch4[]) {
+void schimbpozitieRtoL(byte text[][7], int lungime) {
   byte temp[7];
-  
-  // copiez ch1 in temp
+
   for (int i = 0; i < 7; i++) {
-    temp[i] = ch1[i];
+    temp[i] = text[0][i];
   }
 
-  // ch2 in ch1
-  for (int i = 0; i < 7; i++) {
-    ch1[i] = ch2[i];
+  for (int i = 0; i < lungime - 1; i++) {
+    for (int j = 0; j < 7; j++) {
+      text[i][j] = text[i + 1][j];
+    }
   }
 
-  // ch3 in ch2
+  for (int j = 0; j < 7; j++) {
+    text[lungime - 1][j] = temp[j];
+  }
+}
+
+void schimbpozitieLtoR(byte text[][7], int lungime) {
+  byte temp[7];
+
   for (int i = 0; i < 7; i++) {
-    ch2[i] = ch3[i];
+    temp[i] = text[lungime - 1][i];
   }
 
-  // ch4 in ch3
-  for (int i = 0; i < 7; i++) {
-    ch3[i] = ch4[i];
+  for (int i = lungime - 1; i > 0; i--) {
+    for (int j = 0; j < 7; j++) {
+      text[i][j] = text[i - 1][j];
+    }
   }
 
-  // temp in ch4
-  for (int i = 0; i < 7; i++) {
-    ch4[i] = temp[i];
+  for (int j = 0; j < 7; j++) {
+    text[0][j] = temp[j];
   }
 }
 
