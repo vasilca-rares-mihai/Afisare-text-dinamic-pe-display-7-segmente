@@ -13,19 +13,17 @@ const int dig3 = 12;
 const int dig4 = 13;
 
 byte text[][7] = {
-  {1, 1, 1, 1, 1, 1, 1}, 
-  {1, 1, 1, 1, 1, 1, 1}, 
-  {1, 1, 1, 1, 1, 1, 1}, 
-  {1, 1, 1, 1, 1, 1, 1}, 
   {1, 0, 0, 1, 0, 0, 0},  // H
   {0, 1, 1, 0, 0, 0, 0},  // E
   {1, 1, 1, 0, 0, 0, 1},  // L
-  {0, 0, 0, 0, 0, 0, 1}   // O
+  {0, 0, 0, 0, 0, 0, 1},  // O
 };
-
 int lungime = sizeof(text) / sizeof(text[0]);
+
+
 bool start = false;
-bool scrollLR = false;
+int scrollLR = 0;
+int scrollUD = 0;
 
 
 void setup() {
@@ -50,42 +48,85 @@ void setup() {
 
   //buton
   DDRC &= ~(1 << 0);   
-  PORTC |= (1 << 0);   
+  PORTC |= (1 << 0);  
+  DDRC &= ~(1 << 1);   
+  PORTC |= (1 << 1);   
 
 
 }
 
+
 void loop() {
-  for (int i = 0; i < 100; i++) {
-    displayDigit(text[0], dig1);
-    delay(5);
-    displayDigit(text[1], dig2);
-    delay(5);
-    displayDigit(text[2], dig3);
-    delay(5);
-    displayDigit(text[3], dig4);
-    delay(5);
-  }
+
 
   if ((PINC & (1 << 0)) == 0) {  
-    Serial.println("Buton APASAT");
+    delay(200);
+    Serial.println("Apasat buton L/R");
     start = true;
-    if(scrollLR == false) {
-      scrollLR = true;
+    if(scrollLR == 0) {
+      scrollLR = 1;
+      scrollUD = 2;
     } else {
-      scrollLR = false;
+      scrollLR = 0;
+      scrollUD = 2;
     }
-  } else {
-    Serial.println("Buton NEAPASAT");
+  }
+  if((PINC & (1 << 1)) == 0) {
+    delay(200);
+    Serial.println("Apasat buton U/D");
+    start = true;
+    if(scrollUD == 0) {
+      scrollUD = 1;
+      scrollLR = 2;
+    } else {
+      scrollUD = 0;
+      scrollLR = 2;
+    }
   }
 
+
   if(start == true) {
-    if(scrollLR == false) {
-      schimbpozitieRtoL(text, lungime);
-    } else {
-      schimbpozitieLtoR(text, lungime);
+    
+
+    if(scrollLR == 0) {
+      SchimbPozitieLtoR(text, lungime, 4);
+      SchimbPozitieLtoR(text, lungime, 3);
+      SchimbPozitieLtoR(text, lungime, 2);
+      SchimbPozitieLtoR(text, lungime, 1);
+      SchimbPozitieRtoL(text, lungime, 0);
+      SchimbPozitieRtoL(text, lungime, 1);
+      SchimbPozitieRtoL(text, lungime, 2);
+      SchimbPozitieRtoL(text, lungime, 3);
+      
+    } else if(scrollLR == 1){
+      SchimbPozitieRtoL(text, lungime, 4);
+      SchimbPozitieRtoL(text, lungime, 3);
+      SchimbPozitieRtoL(text, lungime, 2);
+      SchimbPozitieRtoL(text, lungime, 1);
+      SchimbPozitieRtoL(text, lungime, 0);
+      SchimbPozitieLtoR(text, lungime, 1);
+      SchimbPozitieLtoR(text, lungime, 2);
+      SchimbPozitieLtoR(text, lungime, 3);
     }
+    
+    if(scrollUD == 0) {
+      shiftareBitiJos(text, lungime, 3);
+      shiftareBitiJos(text, lungime, 2);
+      shiftareBitiJos(text, lungime, 1);
+      shiftareBitiJos(text, lungime, 0);
+      shiftareBitiSus(text, lungime, 1);
+      shiftareBitiSus(text, lungime, 2);
+    } 
+    if(scrollUD == 1) {
+      shiftareBitiSus(text, lungime, 3);
+      shiftareBitiSus(text, lungime, 2);
+      shiftareBitiSus(text, lungime, 1);
+      shiftareBitiSus(text, lungime, 0);
+      shiftareBitiJos(text, lungime, 1);
+      shiftareBitiJos(text, lungime, 2);
+    } 
   }
+
 
 }
 
@@ -124,39 +165,140 @@ void displayDigit(byte characterPattern[], int digitPin) {
   digitalWrite(digitPin, HIGH);
 }
 
-void schimbpozitieRtoL(byte text[][7], int lungime) {
-  byte temp[7];
 
-  for (int i = 0; i < 7; i++) {
-    temp[i] = text[0][i];
+
+void SchimbPozitieRtoL(byte text[][7], int lungime, int pozitie) {
+  byte textaux[][7] = {
+    {1, 1, 1, 1, 1, 1, 1},  
+    {1, 1, 1, 1, 1, 1, 1},  
+    {1, 1, 1, 1, 1, 1, 1},  
+    {1, 1, 1, 1, 1, 1, 1},  
+    {1, 1, 1, 1, 1, 1, 1},  
+    {1, 1, 1, 1, 1, 1, 1},  
+    {1, 1, 1, 1, 1, 1, 1},  
+    {1, 1, 1, 1, 1, 1, 1}
+  };
+  int lungimeaux = sizeof(textaux) / sizeof(textaux[0]);
+
+  for(int i=0; i<lungime; i++) {
+    for(int j=0; j<7; j++) {
+      textaux[i][j] = text[i][j];
+    }
   }
 
-  for (int i = 0; i < lungime - 1; i++) {
+  byte temp[7];
+  for(int z=0; z<pozitie; z++) {
+    for (int i = 0; i < 7; i++) {
+      temp[i] = textaux[0][i];
+    }
+
+    for (int i = 0; i < lungimeaux - 1; i++) {
+      for (int j = 0; j < 7; j++) {
+        textaux[i][j] = textaux[i + 1][j];
+      }
+    }
+
     for (int j = 0; j < 7; j++) {
-      text[i][j] = text[i + 1][j];
+      textaux[lungimeaux - 1][j] = temp[j];
+    }
+  }
+  afiseaza(textaux);
+}
+
+
+void SchimbPozitieLtoR(byte text[][7], int lungime, int pozitie) {
+  byte textaux[][7] = {
+    {1, 1, 1, 1, 1, 1, 1},  
+    {1, 1, 1, 1, 1, 1, 1},  
+    {1, 1, 1, 1, 1, 1, 1},  
+    {1, 1, 1, 1, 1, 1, 1},  
+    {1, 1, 1, 1, 1, 1, 1},  
+    {1, 1, 1, 1, 1, 1, 1},  
+    {1, 1, 1, 1, 1, 1, 1},  
+    {1, 1, 1, 1, 1, 1, 1}
+  };
+  int lungimeaux = sizeof(textaux) / sizeof(textaux[0]);
+
+  for(int i=0; i<lungime; i++) {
+    for(int j=0; j<7; j++) {
+      textaux[i][j] = text[i][j];
+    }
+  }
+
+  byte temp[7];
+  for(int z=0; z<pozitie; z++) {
+  for (int i = 0; i < 7; i++) {
+    temp[i] = textaux[lungimeaux - 1][i];
+  }
+
+  for (int i = lungimeaux - 1; i > 0; i--) {
+    for (int j = 0; j < 7; j++) {
+      textaux[i][j] = textaux[i - 1][j];
     }
   }
 
   for (int j = 0; j < 7; j++) {
-    text[lungime - 1][j] = temp[j];
+    textaux[0][j] = temp[j];
+  }
+  }
+  afiseaza(textaux);
+}
+
+void shiftareBitiJos(byte text[][7], int lungime, int repetari) {
+  byte textaux[lungime][7];
+  
+  for (int i = 0; i < lungime; i++) {
+    for (int j = 0; j < 7; j++) {
+      textaux[i][j] = text[i][j];
+    }
+  }
+  
+  for(int j=0; j<repetari; j++) {
+    for(int i=0; i<lungime; i++) {
+      textaux[i][4] = textaux[i][5];
+      textaux[i][5] = 1;
+      textaux[i][2] = textaux[i][1];
+      textaux[i][1] = 1;
+      textaux[i][3] = textaux[i][6];
+      textaux[i][6] = textaux[i][0];
+      textaux[i][0] = 1;
+    }
+  }
+  afiseaza(textaux);
+
+}
+
+void afiseaza(byte text[][7]) {
+  for (int i = 0; i < 50; i++) {
+    displayDigit(text[0], dig1);
+    delay(5);
+    displayDigit(text[1], dig2);
+    delay(5);
+    displayDigit(text[2], dig3);
+    delay(5);
+    displayDigit(text[3], dig4);
+    delay(5);
   }
 }
 
-void schimbpozitieLtoR(byte text[][7], int lungime) {
-  byte temp[7];
-
-  for (int i = 0; i < 7; i++) {
-    temp[i] = text[lungime - 1][i];
-  }
-
-  for (int i = lungime - 1; i > 0; i--) {
+void shiftareBitiSus(byte text[][7], int lungime, int repetari) {
+  byte textaux[lungime][7];
+  for (int i = 0; i < lungime; i++) {
     for (int j = 0; j < 7; j++) {
-      text[i][j] = text[i - 1][j];
+      textaux[i][j] = text[i][j];
     }
   }
 
-  for (int j = 0; j < 7; j++) {
-    text[0][j] = temp[j];
+  for(int j=0; j<repetari; j++) {
+    for(int i=0; i<lungime; i++) {
+      textaux[i][5] = textaux[i][4];
+      textaux[i][4] = 1;
+      textaux[i][1] = textaux[i][2];
+      textaux[i][2] = 1;
+      textaux[i][0] = textaux[i][6];
+      textaux[i][6] = textaux[i][3];
+      textaux[i][3] = 1;
+    }
   }
+    afiseaza(textaux);
 }
-
