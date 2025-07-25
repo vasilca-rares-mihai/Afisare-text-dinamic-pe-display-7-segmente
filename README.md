@@ -58,11 +58,11 @@ Sistemul permite afisarea unui text ce se poate derula (scroll) in diferite dire
 ### Butoane
 
 - **Butonul stanga (A0):**  
-  La fiecare apasare, se activeaza modul scroll orizontal (stanga ↔ dreapta).  
+  La fiecare apasare, se activeaza modul scroll orizontal (stanga, dreapta).  
   Directia de scroll se inverseaza succesiv: stanga -> dreapta -> stanga -> dreapta, etc.
 
 - **Butonul dreapta (A1):**  
-  La fiecare apasare, se activeaza modul scroll vertical (sus ↕ jos).  
+  La fiecare apasare, se activeaza modul scroll vertical (sus, jos).  
   Directia de scroll se inverseaza succesiv: sus -> jos -> sus -> jos, etc.
 
 ### Vizualizare pe display
