@@ -38,6 +38,45 @@ Sistemul permite afisarea unui text ce se poate derula (scroll) in diferite dire
 
 ---
 
-## Contributii
+## Componente si Conexiuni Hardware
 
-Orice contributii sunt binevenite! Pentru propuneri, deschideti un issue sau un pull request.
+- **Arduino UNO**
+- **Display 7-segmente, 4 digiti**
+- **2 butoane**
+
+**Conexiuni:**
+
+- Segmentele A–G + DP ale afișajului sunt conectate la pinii D2–D9.
+- DIG1–DIG4 sunt controlati de pinii D10–D13.
+- Butonul stanga este conectat la pinul A0, iar butonul dreapta la pinul A1.
+- Ambele butoane au rezistente pull-up activate din software, deci sunt active la nivel LOW.
+
+---
+
+## Descriere functionare
+
+### Butoane
+
+- **Butonul stanga (A0):**  
+  La fiecare apasare, se activeaza modul scroll orizontal (stanga ↔ dreapta).  
+  Directia de scroll se inverseaza succesiv: stanga -> dreapta -> stanga -> dreapta, etc.
+
+- **Butonul dreapta (A1):**  
+  La fiecare apasare, se activeaza modul scroll vertical (sus ↕ jos).  
+  Directia de scroll se inverseaza succesiv: sus -> jos -> sus -> jos, etc.
+
+### Vizualizare pe display
+
+- Textul implicit este **"HELO"**, reprezentat prin coduri binare pentru segmentele 7-segmente.
+
+#### Scroll orizontal
+- Caracterele se deplaseaza pe display de la stanga la dreapta si invers.
+- Implementat prin functiile `SchimbPozitieRtoL()` si `SchimbPozitieLtoR()`.
+- Creeaza un efect de miscare orizontala fluida, caracterele rotindu-se intr-un ciclu continuu.
+
+#### Scroll vertical
+- Segmentele care formeaza caracterele sunt mutate sus sau jos, creand un efect de glisare verticala.
+- Implementat prin functiile `shiftareBitiJos()` si `shiftareBitiSus()`.
+- Ordinea literelor ramane aceeasi, insa iluminarea segmentelor variaza, simuland urcarea sau coborarea textului.
+
+---
